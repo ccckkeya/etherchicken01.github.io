@@ -1,5 +1,5 @@
 export default {
-  ABI:[
+  ABI: [
     {
       "constant": false,
       "inputs": [],
@@ -251,7 +251,7 @@ export default {
     {
       "constant": true,
       "inputs": [],
-      "name": "getMyEggs",
+      "name": "getMyChicken",
       "outputs": [
         {
           "name": "",
@@ -265,7 +265,7 @@ export default {
     {
       "constant": true,
       "inputs": [],
-      "name": "getMyShrimp",
+      "name": "getMyEggs",
       "outputs": [
         {
           "name": "",
@@ -376,5 +376,5 @@ export default {
       "type": "function"
     }
   ],
-  address: '0xaf9c11c742c3c7688dcb1d7a603a66c060ad935f'
+  address: '0x332db7132ae6a65c2d8e5768051d0746d25ad14c'
 }
