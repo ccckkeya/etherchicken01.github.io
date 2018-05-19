@@ -376,5 +376,5 @@ export default {
       "type": "function"
     }
   ],
-  address: '0x332db7132ae6a65c2d8e5768051d0746d25ad14c'
+  address: '0x246a3cc8430909cb9b4ea2c55064045096656792'
 }

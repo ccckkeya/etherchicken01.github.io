@@ -2,17 +2,19 @@ import React, { Component } from 'react';
 import Web3 from 'web3';
 import Token from './Contract/interface'
 import './App.css'
+import { Modal } from 'react-pure-css-modal';
 var web3 = window.web3;
 
 if (typeof web3 !== 'undefined') {
   var web3 = new Web3(web3.currentProvider);
 } else {
   alert('Please install Metamask plugin first.')
-  // window.location.href = 'https://metamask.io/';
+  window.location = "https://chrome.google.com/webstore/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn"
 }
 
 const Contract = web3.eth.contract(Token.ABI).at(Token.address);
 window.Contract = Contract;
+
 
 class App extends Component {
   constructor() {
@@ -30,6 +32,7 @@ class App extends Component {
   }
   componentDidMount() {
     this.setState({ farmer: web3.eth.accounts[0] }, () => {
+      console.log(web3.eth.accounts[0])
       // 偵測Metamask帳號更改
       var accountInterval = setInterval(() => {
         this.init();
@@ -58,9 +61,6 @@ class App extends Component {
         })
       }
     })
-    Contract.marketEggs((e, r) => {
-      console.log(r)
-    })
 
     let weitospend = web3.toWei(this.state.moneyToBuy, 'ether')
     Contract.calculateEggBuySimple(weitospend, (e, r) => {
@@ -77,7 +77,7 @@ class App extends Component {
       Contract.devFee(wei, (e, r) => {
         if (r) {
           let fee = web3.toDecimal(r);
-          this.setState({ eggToEth: web3.fromWei(wei - fee,'ether')})
+          this.setState({ eggToEth: web3.fromWei(wei - fee, 'ether') })
         }
       });
     });
@@ -127,6 +127,19 @@ class App extends Component {
     })
   }
 
+  getFreeChicken() {
+    Contract.getFreeCHICKEN({
+      from: web3.eth.accounts[0],
+      gasPrice: 1100000000
+    }, (e, r) => {
+      if (e) {
+        console.log(e);
+        return
+      }
+      this.showAlert('Success get free chicken!');
+    })
+  }
+
   showAlert(text) {
     this.setState({ alertText: text, showAlert: true });
     setTimeout(() => {
@@ -136,23 +149,37 @@ class App extends Component {
   render() {
     return (
       <div className="App">
-        <div className="background">
-          <div style={{ color: 'white', fontSize: '25px', fontWeight: "bold", fontFamily: "monospace" }}>Ethereum Chicken Farm</div>
-          <div>I have {this.state.myChicken} Chicken</div>
-          <div>I have {this.state.myEggs} Eggs</div>
+        <div style={{padding: '25px'}} className="background">
+          <div style={{ position: 'absolute', top: '5px', left: '5px' }}>Address: {web3.eth.accounts[0]}</div>
+          <button onClick={() => document.getElementById('howToPlayModal').click()} style={{ position: 'absolute', right: 0, top: 0 }} type="button" className="btn btn-outline-secondary">How to Play</button>
 
-          <div>Producing {this.state.productive} eggs per Minute</div>
-          <button onClick={() => this.getEgg()} type="button" className="btn btn-info">Get your First Free Chicken</button>
+          <div style={{ color: 'white', fontSize: '25px', fontWeight: "bold", fontFamily: "monospace" }}>Ethereum Chicken</div>
 
-          <button onClick={() => this.hatchEgg()} type="button" className="btn btn-info">Hetch Egg</button>
-          <div>You can hatch {Math.floor(this.state.myEggs / 86400)} chickens from {this.state.myEggs} eggs</div>
-          <div>
-            <button onClick={() => this.sellEgg()} type="button" className="btn btn-info">Sell Egg</button>
-            <div>{this.state.myEggs} eggs would sell for {this.state.eggToEth} Ether</div>
-          </div>
-          <div>
-            <button onClick={() => this.buyEgg()} type="button" className="btn btn-info">Buy Egg</button>
-            <div>{this.state.ethToEgg} eggs  for <input onChange={(e) => this.setState({ moneyToBuy: e.target.value })} step="0.01" defaultValue="0.01" type="number" /> Ether</div>
+          <div style={{ marginTop: '130px' }}>
+            <div>I have {this.state.myChicken} Chicken</div>
+            <div>I have {this.state.myEggs} Eggs</div>
+
+            <div>Producing {this.state.productive} eggs per Minute</div>
+
+
+            <br />
+            {this.state.myChicken === 0
+              ? <button style={{ marginRight: '20px' }} onClick={() => this.getFreeChicken()} type="button" className="btn btn-info">Get your First Free Chicken</button>
+              : ''
+            }
+            <button onClick={() => this.hatchEgg()} type="button" className="btn btn-info">Hetch Egg</button>
+            <div>You can hatch {Math.floor(this.state.myEggs / 86400)} chickens from {this.state.myEggs} eggs</div>
+            <br />
+            <div>
+              <button onClick={() => this.sellEgg()} type="button" className="btn btn-info">Sell Egg</button>
+              <div>{this.state.myEggs} eggs would sell for {parseFloat(this.state.eggToEth).toFixed(7)} Ether</div>
+            </div>
+            <br />
+
+            <div>
+              <button onClick={() => this.buyEgg()} type="button" className="btn btn-info">Buy Egg</button>
+              <div style={{ marginTop: '5px' }}>{this.state.ethToEgg} eggs  for <input style={{ width: '70px' }} onChange={(e) => this.setState({ moneyToBuy: e.target.value })} step="0.01" defaultValue="0.01" type="number" /> Ether</div>
+            </div>
           </div>
           <div style={{ position: 'absolute', bottom: '0px' }}>
             <a style={{ color: 'white' }} href="https://www.freepik.com/free-vector/frame-template-with-chickens-in-the-farm_1472180.htm">Designed by Freepik</a>
@@ -173,6 +200,25 @@ class App extends Component {
             :
             ''
         }
+        <Modal style={{ width: '80%', left: '10%', height: '400px', padding: '10px' }} id="howToPlayModal" onClose={() => { console.log("Modal close") }} >
+          <div>
+            <div style={{ fontWeight: "bold" }}>
+              Ethereum Chicken
+            </div>
+            <br />
+            Ether Chicken is the #1 chicken farming simulator and idle game on the blockchain. The more chicken you have, the more eggs they lay <br />(each chicken lays at a rate of 1 per second). Hatch more chicken with your eggs to multiply your production, or cash them out for Ethereum!
+        </div><br />
+          <div>
+            <div style={{ fontWeight: "bold" }}>Automated Market</div>
+            <br />
+            Ether Chicken features a high tech automated market that lets you instantly buy or sell chicken eggs with a single transaction. <br />Driven by supply and demand, the price automatically adjusts as players trade.
+        </div><br />
+          <div>
+            <div style={{ fontWeight: "bold" }}>Referrals</div>
+            <br />
+            Earn 20% the number of all eggs hatched by anyone who starts playing using your link:<br /> <a href={`https://etherchicken.com?ref=${web3.eth.accounts[0]}`}>{`https://etherchicken.com?ref=${web3.eth.accounts[0]}`}</a>
+          </div>
+        </Modal>
       </div>
     );
   }
